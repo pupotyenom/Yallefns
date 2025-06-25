@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Messages</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --primary-color: #1e90ff;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      padding-bottom: 80px;
+    }
+
+    .chat-card {
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .profile-photo {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 12px;
+      border: 2px solid var(--primary-color);
+    }
+
+    .chat-info {
+      flex: 1;
+    }
+
+    .chat-info h4 {
+      margin: 0;
+      font-size: 16px;
+      color: var(--primary-color);
+    }
+
+    .chat-info p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .chat-info small {
+      font-size: 11px;
+      color: #777;
+    }
+
+    .unread-dot {
+      width: 10px;
+      height: 10px;
+      background: red;
+      border-radius: 50%;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #ccc;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 60px;
+      z-index: 1000;
+    }
+
+    .bottom-nav a {
+      text-decoration: none;
+      color: #000;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .bottom-nav a span {
+      display: block;
+      font-size: 20px;
+      color: var(--primary-color);
+    }
+
+    .bottom-nav a.active {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2 style="color: var(--primary-color);">Messages</h2>
+  <div id="messages-list"><p>Loading conversations...</p></div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <a href="dashboard.html"><span>🏠</span>Home</a>
+  <a href="messages.html" class="active"><span>💬</span>Messages</a>
+  <a href="photo-gallery.html"><span>📸</span>Photos</a>
+  <a href="profile.html"><span>👤</span>Profile</a>
+  <a href="settings.html"><span>⚙️</span>Settings</a>
+</div>
+
+<script>
+  const API_KEY = "patOGV0iRHzcXqr8g.04342f3ee30d0fa95fc93b08324529b21ac563e86c22cacecac74b735076f009";
+  const BASE_ID = "appF5Uq1SQBceGQNm";
+  const TABLE_NAME = "messages";
+  const API_URL = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
+
+  const currentUser = localStorage.getItem("username");
+  const gender = localStorage.getItem("gender");
+  const lastSeen = localStorage.getItem("last_seen_" + currentUser);
+
+  if (gender === "female") {
+    document.documentElement.style.setProperty('--primary-color', '#ff69b4');
+  }
+
+  function timeAgo(timestamp) {
+    const now = new Date();
+    const then = new Date(timestamp);
+    const seconds = Math.floor((now - then) / 1000);
+
+    if (seconds < 60) return "Just now";
+    const mins = Math.floor(seconds / 60);
+    if (mins < 60) return `${mins} min${mins > 1 ? 's' : ''} ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} hour${hrs > 1 ? 's' : ''} ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days} day${days > 1 ? 's' : ''} ago`;
+  }
+
+  async function loadMessages() {
+    const res = await fetch(API_URL, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`
+      }
+    });
+
+    const data = await res.json();
+    const messages = data.records.map(r => r.fields);
+
+    const convos = {};
+
+    messages.forEach(msg => {
+      if (msg.from === currentUser || msg.to === currentUser) {
+        const partner = msg.from === currentUser ? msg.to : msg.from;
+        const photo = msg.from === currentUser ? msg.to_photo : msg.from_photo;
+
+        if (!convos[partner] || new Date(msg.timestamp) > new Date(convos[partner].timestamp)) {
+          convos[partner] = { ...msg, photo };
+        }
+      }
+    });
+
+    const box = document.getElementById("messages-list");
+    box.innerHTML = "";
+
+    const users = Object.keys(convos);
+    if (users.length === 0) {
+      box.innerHTML = "<p>No messages yet.</p>";
+      return;
+    }
+
+    users.forEach(user => {
+      const msg = convos[user];
+      const isMe = msg.from === currentUser;
+      const isUnread = !lastSeen || new Date(msg.timestamp) > new Date(lastSeen);
+      const profile = msg.photo || "https://via.placeholder.com/100";
+
+      const card = document.createElement("div");
+      card.className = "chat-card";
+      card.innerHTML = `
+        <img src="${profile}" class="profile-photo">
+        <div class="chat-info">
+          <h4>${user}</h4>
+          <p>${isMe ? "You: " : ""}${msg.text}</p>
+          <small>${timeAgo(msg.timestamp)}</small>
+        </div>
+        ${isUnread ? `<div class="unread-dot"></div>` : ""}
+      `;
+
+      card.onclick = () => {
+        localStorage.setItem("chat_with", user);
+        localStorage.setItem("chat_with_photo", profile);
+        window.location.href = "chat.html";
+      };
+
+      box.appendChild(card);
+    });
+  }
+
+  loadMessages();
+</script>
+</body>
+</html>
