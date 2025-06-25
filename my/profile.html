@@ -1,0 +1,360 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --primary-color: #1e90ff;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff;
+      color: #000;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+    }
+    .profile-card {
+      background: #f9f9f9;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 80px;
+    }
+    .profile-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 15px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      color: var(--primary-color);
+    }
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 15px;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: #eee;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+    }
+    .tab.active {
+      background: var(--primary-color);
+      color: white;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .edit-btn {
+      float: right;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--primary-color);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+    }
+    .modal-content h3 {
+      margin-top: 0;
+    }
+    .modal-content input {
+      width: 100%;
+      margin: 8px 0;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .modal-content button {
+      padding: 10px 15px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #fff;
+      border-top: 1px solid #ccc;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .bottom-nav a {
+      text-decoration: none;
+      color: #000;
+      font-size: 12px;
+      text-align: center;
+    }
+    .bottom-nav a span {
+      display: block;
+      font-size: 20px;
+    }
+    .bottom-nav a.active span {
+      color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Your Profile</h2>
+    <div class="profile-card">
+      <img src="" id="profilePhoto" class="profile-photo" alt="Profile Photo">
+      <div class="tabs">
+        <div class="tab active" onclick="showTab('info')">Info</div>
+        <div class="tab" onclick="showTab('social')">Social</div>
+        <div class="tab" onclick="showTab('settings')">Settings</div>
+      </div>
+      <div class="tab-content active" id="info">
+        <span class="edit-btn" onclick="openEditModal()">✏️ Edit</span>
+        <p><strong>Full Name:</strong> <span id="fullName"></span></p>
+        <p><strong>Username:</strong> <span id="usernameDisplay"></span></p>
+        <p><strong>Gender:</strong> <span id="gender"></span></p>
+        <p><strong>Location:</strong> <span id="location"></span></p>
+        <p><strong>Date of Birth:</strong> <span id="dob"></span></p>
+        <p><strong>Zodiac Sign:</strong> <span id="zodiac"></span></p>
+        <p><strong>Phone:</strong> <span id="phone"></span></p>
+        <p><strong>Joined:</strong> <span id="joined"></span></p>
+      </div>
+      <div class="tab-content" id="social">
+        <span class="edit-btn" onclick="openSocialModal()">✏️ Edit</span>
+        <p><strong>Bio:</strong> <span id="bio"></span></p>
+        <p><strong>Orientation:</strong> <span id="orientation"></span></p>
+        <p><strong>Relationship Status:</strong> <span id="status"></span></p>
+        <p><strong>Height:</strong> <span id="height"></span> cm</p>
+        <p><strong>Weight:</strong> <span id="weight"></span> kg</p>
+        <p><strong>Eye Color:</strong> <span id="eye"></span></p>
+        <p><strong>Hair Color:</strong> <span id="hair"></span></p>
+        <p><strong>Religion:</strong> <span id="religion"></span></p>
+        <p><strong>Ethnicity:</strong> <span id="ethnicity"></span></p>
+        <p><strong>Interests:</strong> <span id="interests"></span></p>
+      </div>
+      <div class="tab-content" id="settings">
+        <p><a href="#" onclick="alert('Change Password coming soon')">🔒 Change Password</a></p>
+        <p><a href="#" onclick="alert('Logout clicked')">🚪 Logout</a></p>
+        <p><a href="#" onclick="alert('Language toggle soon')">🌐 Switch Language</a></p>
+      </div>
+    </div>
+  </div>  <!-- Edit Info Modal -->  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit Info</h3>
+      <input type="text" id="editName" placeholder="Full Name">
+      <input type="text" id="editLocation" placeholder="Location">
+      <input type="text" id="editGender" placeholder="Gender">
+      <input type="text" id="editDob" placeholder="Date of Birth">
+      <input type="text" id="editPhone" placeholder="Phone Number">
+      <button onclick="saveEditInfo()">Save</button>
+    </div>
+  </div>  <!-- Edit Social Modal -->  <div class="modal" id="socialModal">
+    <div class="modal-content">
+      <h3>Edit Social Info</h3>
+      <input type="text" id="editBio" placeholder="Bio">
+      <input type="text" id="editOrientation" placeholder="Orientation">
+      <input type="text" id="editStatus" placeholder="Relationship Status">
+      <input type="text" id="editHeight" placeholder="Height (cm)">
+      <input type="text" id="editWeight" placeholder="Weight (kg)">
+      <input type="text" id="editEye" placeholder="Eye Color">
+      <input type="text" id="editHair" placeholder="Hair Color">
+      <input type="text" id="editReligion" placeholder="Religion">
+      <input type="text" id="editEthnicity" placeholder="Ethnicity">
+      <input type="text" id="editInterests" placeholder="Interests">
+      <button onclick="saveSocialInfo()">Save</button>
+    </div>
+  </div>  <!-- Bottom nav -->  <div class="bottom-nav">
+    <a href="dashboard.html"><span>🏠</span>Home</a>
+    <a href="messages.html"><span>💬</span>Messages</a>
+    <a href="photo-gallery.html"><span>📸</span>Photos</a>
+    <a href="profile.html" class="active"><span>👤</span>Profile</a>
+    <a href="settings.html"><span>⚙️</span>Settings</a>
+  </div> 
+  <script>
+// 📌 Airtable config
+const AIRTABLE_API_KEY = "patOGV0iRHzcXqr8g.04342f3ee30d0fa95fc93b08324529b21ac563e86c22cacecac74b735076f009";
+const BASE_ID = "appF5Uq1SQBceGQNm";
+const USERS_TABLE = "users";
+
+const username = localStorage.getItem("username");
+const gender = localStorage.getItem("gender");
+let userId = "";
+
+if (gender === "female") {
+  document.documentElement.style.setProperty('--primary-color', '#ff69b4');
+}
+
+function showTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function getZodiac(dobStr) {
+  const date = new Date(dobStr);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const signs = ["Capricorn","Aquarius","Pisces","Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius"];
+  const cutoffs = [20,19,20,20,21,21,23,23,23,23,22,22];
+  return (day < cutoffs[month - 1]) ? signs[(month + 10) % 12] : signs[(month - 1) % 12];
+}
+
+function openEditModal() {
+  document.getElementById("editModal").style.display = "flex";
+}
+function openSocialModal() {
+  document.getElementById("socialModal").style.display = "flex";
+}
+
+async function saveEditInfo() {
+  const fields = {
+    full_name: document.getElementById("editName").value,
+    location: document.getElementById("editLocation").value,
+    gender: document.getElementById("editGender").value,
+    dob: document.getElementById("editDob").value,
+    phone_number: document.getElementById("editPhone").value
+  };
+
+  await fetch(`https://api.airtable.com/v0/${BASE_ID}/${USERS_TABLE}/${userId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ fields })
+  });
+
+  alert("Info updated!");
+  document.getElementById("editModal").style.display = "none";
+  loadProfile();
+}
+
+async function saveSocialInfo() {
+  // Get values safely
+  const bio = document.getElementById("editBio")?.value;
+  const orientation = document.getElementById("editOrientation")?.value;
+  const status = document.getElementById("editStatus")?.value;
+  const height = parseInt(document.getElementById("editHeight")?.value) || 0;
+  const weight = parseInt(document.getElementById("editWeight")?.value) || 0;
+  const eye = document.getElementById("editEye")?.value;
+  const hair = document.getElementById("editHair")?.value;
+  const religion = document.getElementById("editReligion")?.value;
+  const ethnicity = document.getElementById("editEthnicity")?.value;
+  const interests = document.getElementById("editInterests")?.value;
+
+  if (!userId) return alert("User ID not set yet!");
+
+  const fields = {
+    bio, orientation,
+    relationship_status: status,
+    height, weight,
+    eye_color: eye,
+    hair_color: hair,
+    religion, ethnicity, interests
+  };
+
+  const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${USERS_TABLE}/${userId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ fields })
+  });
+
+  if (res.ok) {
+    alert("Social info updated!");
+    document.getElementById("socialModal").style.display = "none";
+    loadProfile();
+  } else {
+    alert("Something went wrong while saving social info.");
+  }
+}
+
+async function loadProfile() {
+  const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${USERS_TABLE}`, {
+    headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
+  });
+
+  const data = await res.json();
+  const user = data.records.find(u => u.fields.username === username);
+  if (!user) return;
+
+  userId = user.id;
+  const f = user.fields;
+
+  document.getElementById("profilePhoto").src = f.profile_photo_url || "https://via.placeholder.com/120";
+  document.getElementById("fullName").textContent = f.full_name || "-";
+  document.getElementById("usernameDisplay").textContent = f.username || "-";
+  document.getElementById("gender").textContent = f.gender || "-";
+  document.getElementById("location").textContent = f.location || "-";
+  document.getElementById("dob").textContent = f.dob || "-";
+  document.getElementById("zodiac").textContent = f.dob ? getZodiac(f.dob) : "-";
+  document.getElementById("phone").textContent = f.phone_number || "-";
+  document.getElementById("joined").textContent = f.joined || "-";
+
+  document.getElementById("bio").textContent = f.bio || "-";
+  document.getElementById("orientation").textContent = f.orientation || "-";
+  document.getElementById("status").textContent = f.relationship_status || "-";
+  document.getElementById("height").textContent = f.height || "-";
+  document.getElementById("weight").textContent = f.weight || "-";
+  document.getElementById("eye").textContent = f.eye_color || "-";
+  document.getElementById("hair").textContent = f.hair_color || "-";
+  document.getElementById("religion").textContent = f.religion || "-";
+  document.getElementById("ethnicity").textContent = f.ethnicity || "-";
+  document.getElementById("interests").textContent = f.interests || "-";
+
+  document.getElementById("editName").value = f.full_name || "";
+  document.getElementById("editLocation").value = f.location || "";
+  document.getElementById("editGender").value = f.gender || "";
+  document.getElementById("editDob").value = f.dob || "";
+  document.getElementById("editPhone").value = f.phone_number || "";
+
+  document.getElementById("editBio").value = f.bio || "";
+  document.getElementById("editOrientation").value = f.orientation || "";
+  document.getElementById("editStatus").value = f.relationship_status || "";
+  document.getElementById("editHeight").value = f.height || "";
+  document.getElementById("editWeight").value = f.weight || "";
+  document.getElementById("editEye").value = f.eye_color || "";
+  document.getElementById("editHair").value = f.hair_color || "";
+  document.getElementById("editReligion").value = f.religion || "";
+  document.getElementById("editEthnicity").value = f.ethnicity || "";
+  document.getElementById("editInterests").value = f.interests || "";
+}
+
+loadProfile();
+</script>
+</body>
+</html>
