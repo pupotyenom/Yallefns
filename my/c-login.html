@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - My Social App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Link to config.js -->
+  <script src="assets/config.js"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: white;
+      color: #FFD700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 75vh;
+      margin: 0;
+    }
+
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px #FFD70033;
+      width: 320px;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    h2 {
+      color: #FFC107;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 85%;
+      padding: 12px;
+      margin-top: 20px;
+      border: 3px solid purple;
+      border-radius: 100px;
+      background: white;
+      color: blue;
+      font-size: 15px;
+    }
+
+    button {
+      width: 50%;
+      margin-top: 25px;
+      padding: 12px;
+      background-color: purple;
+      color: white;
+      border: 3px solid black;
+      border-radius: 100px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #FFC107;
+    }
+
+    .error {
+      color: red;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <div class="error" id="error"></div>
+  </div>
+
+  <script>
+    async function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const errorDiv = document.getElementById("error");
+
+      if (!username || !password) {
+        errorDiv.innerText = "Please enter both fields.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${AIRTABLE_API_URL}?filterByFormula=AND({username}='${username}', {password}='${password}')`, {
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_API_KEY}`
+          }
+        });
+
+        const data = await res.json();
+
+        if (data.records.length === 0) {
+          errorDiv.innerText = "Invalid username or password.";
+        } else {
+          const user = data.records[0].fields;
+          const gender = user.gender?.toLowerCase();
+
+          if (gender === "female") {
+            document.documentElement.style.setProperty("--primary-color", "#ff69b4"); // pink
+          } else {
+            document.documentElement.style.setProperty("--primary-color", "#1e90ff"); // blue
+          }
+
+          // Save login in localStorage
+          localStorage.setItem("username", username);
+          localStorage.setItem("gender", gender);
+
+          // Redirect to dashboard
+          window.location.href = "dashboard.html";
+        }
+
+      } catch (err) {
+        errorDiv.innerText = "Error logging in. Try again.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
